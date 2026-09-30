@@ -1,0 +1,46 @@
+@media (max-width: 960px) {
+  .hero-z { height: 150px; right: 24px; }
+  .platform-grid { grid-template-columns: repeat(3, 1fr); }
+  .feature-grid, .step-grid { grid-template-columns: repeat(2, 1fr); }
+  .sms-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+  .foot-grid { grid-template-columns: 1fr 1fr; }
+  .burger { display: inline-flex; }
+  .links { display: none; position: absolute; top: 68px; left: 0; right: 0; flex-direction: column; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 20px 16px; }
+  .links.open { display: flex; }
+  .bar { gap: 12px; }
+}
+@media (max-width: 560px) {
+  .platform-grid { grid-template-columns: repeat(2, 1fr); }
+  .feature-grid, .step-grid { grid-template-columns: 1fr; }
+  .sms-grid { grid-template-columns: 1fr; }
+  .foot-grid { grid-template-columns: 1fr; }
+  .brand span { font-size: 1.05rem; } .brand img { height: 34px; }
+  .user-name, .bal-label { display: none; }
+  .panel { padding: 20px 16px; }
+  .methods { grid-template-columns: 1fr; }
+  .pay-frame { height: 600px; }
+  .hero-card { padding: 30px 20px 0; }
+  .hero-z { height: 96px; right: 16px; top: 18px; opacity: .35; }
+  .hero-cta .btn { flex: 1; }
+  .hero-strip { margin: 24px -20px 0; padding: 14px 20px; gap: 8px 18px; }
+}
+@media (max-width: 560px) {
+  .bar { gap: 8px; }
+  .bar .container, .container { padding-left: 14px; padding-right: 14px; }
+  .brand { gap: 7px; min-width: 0; }
+  .brand span { font-size: .98rem; }
+  .bar-right { gap: 6px; min-width: 0; }
+  .balance-badge { padding: 6px 9px; font-size: .8rem; gap: 6px; }
+  .user-btn { padding: 4px; }
+  .user-btn > .ic { display: none; }
+}
+@media (max-width: 380px) { .brand span { display: none; } }
+@media (max-width: 960px) {
+  .tabbar a, .tabbar button { font-family: inherit; line-height: 1.2; justify-content: flex-start; height: 56px; }
+}
+.two-col > * { min-width: 0; }
+.tabs { max-width: 100%; }
+@media (max-width: 560px) {
+  .hero-z { opacity: .14; top: 14px; }
+}
