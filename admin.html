@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Admin – ZeroDijitalMarket</title>
+<style>
+:root{--bg:#0a0a0a;--s:#141414;--b:#262626;--o:#ee7c2b;--t:#e8eaf0;--m:#8f8b86;--ok:#3fbf7f;--err:#e5534b}
+*{box-sizing:border-box}body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--t);margin:0;padding:14px;max-width:1000px;margin:auto}
+h1{font-size:1.3rem;margin:6px 0 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+h1 a{font-size:.8rem;color:var(--m);text-decoration:none;font-weight:400}
+input,button{font:inherit}
+input{padding:10px;border-radius:8px;border:1px solid var(--b);background:#111;color:var(--t);width:100%}
+button{background:var(--o);color:#170b03;border:0;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600;margin:2px}
+button.r{background:var(--err);color:#fff}button.g{background:transparent;border:1px solid var(--b);color:var(--t)}
+.login{display:flex;gap:8px;margin-bottom:14px}.login input{flex:1}
+.tabs{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto}
+.tab{position:relative;padding:10px 16px;border:1px solid var(--b);border-radius:10px;background:var(--s);color:var(--m);cursor:pointer;white-space:nowrap;font-weight:600}
+.tab.on{color:var(--o);border-color:var(--o)}
+.badge{display:inline-block;min-width:20px;padding:1px 6px;margin-left:6px;border-radius:20px;background:var(--err);color:#fff;font-size:.72rem;text-align:center}
+.badge.z{display:none}
+.wrap{overflow-x:auto;border:1px solid var(--b);border-radius:12px;background:var(--s)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+td,th{border-bottom:1px solid var(--b);padding:10px;text-align:left;vertical-align:middle}
+th{color:var(--m);font-size:.72rem;text-transform:uppercase}
+.gold{color:var(--o);font-weight:700}.empty{text-align:center;color:var(--m);padding:30px}
+.hint{color:var(--m);font-size:.8rem;margin:0 0 10px}
+.sum{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}.sum div{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:10px 14px;font-size:.8rem;color:var(--m)}.sum b{display:block;font-size:1.1rem;color:var(--t)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:16px;z-index:50}.modal.open{display:flex}
+.box{background:var(--s);border:1px solid var(--b);border-radius:14px;padding:22px;width:100%;max-width:380px}
+.box h3{margin:0 0 4px}.box p{margin:0 0 12px;color:var(--m);font-size:.82rem}
+#toasts{position:fixed;top:12px;right:12px;left:12px;max-width:380px;margin-left:auto;z-index:99;display:flex;flex-direction:column;gap:8px}
+.toast{background:#1d1208;border:1px solid var(--o);border-radius:10px;padding:12px 14px;font-size:.88rem;box-shadow:0 8px 30px rgba(0,0,0,.5);cursor:pointer}
+.toast.e{border-color:var(--err);background:#1f0c0b}
+</style></head><body>
+<div id="toasts"></div>
+<h1><span>Admin Panel</span><a href="/">← Siteye dön</a></h1>
+<div class="login"><input id="key" type="password" placeholder="Admin anahtarı"><button onclick="start()">Giriş / Yenile</button></div>
+
+<div class="tabs" id="tabs">
+  <div class="tab on" data-t="dep">Sipariş Onaylama <span class="badge z" id="bDep">0</span></div>
+  <div class="tab" data-t="usr">Kullanıcılar <span class="badge" id="bUsr" style="background:#333">0</span></div>
+  <div class="tab" data-t="bank">Havale Bilgileri</div>
+</div>
+
+<section id="p-dep">
+  <p class="hint">Kullanıcı dekontu yükleyip işlemi gönderince burada görünür. Dekontu kontrol edip <b>Onayla</b>'ya basınca bakiye otomatik yüklenir.</p>
+  <div class="wrap"><table id="dep"></table></div>
+</section>
+<section id="p-usr" style="display:none">
+  <div class="sum"><div>Toplam kullanıcı<b id="sUsers">0</b></div><div>Toplam bakiye<b id="sBal">₺0,00</b></div></div>
+  <input id="search" placeholder="Ad veya e-posta ara..." style="margin-bottom:10px">
+  <div class="wrap"><table id="usr"></table></div>
+</section>
+
+<section id="p-bank" style="display:none">
+  <p class="hint">Kullanıcılar bakiye yüklerken bu bilgileri görür. Kaydettiğin anda sitede güncellenir.</p>
+  <div class="box" style="max-width:520px">
+    <label class="hint">İsim Soyisim (Alıcı)</label>
+    <input id="bName" placeholder="Ad Soyad" maxlength="100" style="margin-bottom:10px">
+    <label class="hint">IBAN</label>
+    <input id="bIban" placeholder="TR00 0000 0000 0000 0000 0000 00" maxlength="42" autocapitalize="characters" style="margin-bottom:10px">
+    <label class="hint">Açıklama</label>
+    <input id="bDesc" placeholder="Havale açıklaması" maxlength="60" style="margin-bottom:14px">
+    <button style="width:100%;margin:0" onclick="saveBank()">Kaydet</button>
+  </div>
+</section>
+
+<div class="modal" id="balModal"><div class="box">
+  <h3 id="mTitle">Bakiye Ekle</h3><p id="mInfo"></p>
+  <input id="mAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Tutar (₺)">
+  <div style="margin-top:12px;display:flex;gap:8px"><button id="mApply" style="flex:1" onclick="saveBal()">Uygula</button><button class="g" style="flex:1" onclick="closeBal()">Vazgeç</button></div>
+</div></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tl=k=>'₺'+(k/100).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const dt=d=>new Date(d).toLocaleString('tr-TR',{dateStyle:'short',timeStyle:'short'});
+let tab='dep',USERS=[],prev={deposits:null},poll=null,balUser=null,balMode=1;
+$('key').value=sessionStorage.getItem('zdm_admin')||'';
+
+async function call(method,body,qs=''){
+  const r=await fetch('/api/admin'+qs,{method,headers:{'x-admin-key':$('key').value,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  let j={};try{j=await r.json()}catch{}
+  if(!r.ok)throw new Error(j.error||('Hata '+r.status));return j;
+}
+function toast(msg,err){const t=document.createElement('div');t.className='toast'+(err?' e':'');t.textContent=msg;t.onclick=()=>t.remove();$('toasts').appendChild(t);setTimeout(()=>t.remove(),6000)}
+function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.15;o.start();setTimeout(()=>{o.frequency.value=1175},140);setTimeout(()=>{o.stop();c.close()},320)}catch{}}
+
+// ── Sekmeler ──
+$('tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;tab=t.dataset.t;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  ['dep','usr','bank'].forEach(k=>$('p-'+k).style.display=k===tab?'':'none');
+  if(tab==='usr')loadUsers();else if(tab==='bank')loadBank();else load();};
+
+function setBadge(id,n){const b=$(id);b.textContent=n;b.classList.toggle('z',!n)}
+function updateTitle(d){document.title=(d>0?'('+d+') ':'')+'Admin – ZeroDijitalMarket'}
+
+// ── Bildirimler: 6 sn'de bir yeni işlem var mı bak ──
+async function checkCounts(){
+  try{
+    const c=await call('GET',null,'?counts=1');
+    setBadge('bDep',c.deposits);updateTitle(c.deposits);
+    if(prev.deposits!==null){
+      if(c.deposits>prev.deposits){const n=c.deposits-prev.deposits;toast('💰 '+n+' yeni bakiye onayı bekliyor (dekont yüklendi)');beep();if(tab==='dep')load()}
+    }
+    prev={deposits:c.deposits};
+  }catch{}
+}
+function start(){sessionStorage.setItem('zdm_admin',$('key').value);prev={deposits:null};load();checkCounts();
+  if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+  clearInterval(poll);poll=setInterval(checkCounts,6000);}
+
+// ── Bakiye onayları + siparişler ──
+async function load(){
+  try{
+    const {deposits}=await call('GET');
+    setBadge('bDep',deposits.length);updateTitle(deposits.length);
+    prev={deposits:deposits.length};
+    $('dep').innerHTML='<tr><th>Kod</th><th>Kullanıcı</th><th>Tutar</th><th>Tarih</th><th></th></tr>'+
+      (deposits.map(d=>`<tr><td>${esc(d.oid)}</td><td>${esc(d.name)}<br><small style="color:var(--m)">${esc(d.email)}</small></td><td class="gold">${tl(d.amount)}</td><td>${dt(d.created_at)}</td>
+      <td><button class="g" data-a="receipt" data-oid="${esc(d.oid)}">Dekont</button><button data-a="approve" data-oid="${esc(d.oid)}">Onayla</button><button class="r" data-a="reject" data-oid="${esc(d.oid)}">Reddet</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">Onay bekleyen işlem yok.</td></tr>');
+  }catch(e){toast(e.message,true)}
+}
+
+document.addEventListener('click',async e=>{
+  const b=e.target.closest('button[data-a]');if(!b)return;const a=b.dataset.a;
+  try{
+    if(a==='receipt'){
+      const r=await call('GET',null,'?receipt='+encodeURIComponent(b.dataset.oid));
+      const bin=atob(r.data),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+      window.open(URL.createObjectURL(new Blob([u],{type:r.type})),'_blank');
+    }else if(a==='approve'||a==='reject'){
+      if(!confirm(a==='approve'?'Dekont doğru mu? Onaylanınca kullanıcıya bakiye yüklenecek.':'Reddedilsin mi?'))return;
+      const r=await call('POST',{type:'deposit',oid:b.dataset.oid,action:a});
+      toast(a==='approve'?(r.ok?'✅ Onaylandı, bakiye yüklendi.':'Bu işlem zaten işlenmiş.'):'Reddedildi.');load();
+    }else if(a==='bal'){
+      balUser=USERS.find(u=>u.id==b.dataset.id);balMode=b.dataset.m==='sub'?-1:1;
+      $('mTitle').textContent=(balMode<0?'Bakiye Eksilt · ':'Bakiye Ekle · ')+balUser.name;
+      $('mApply').textContent=balMode<0?'Eksilt':'Ekle';$('mApply').className=balMode<0?'r':'';
+      $('mInfo').textContent=balUser.email+' · Mevcut: '+tl(balUser.balance);$('mAmount').value='';$('balModal').classList.add('open');$('mAmount').focus();
+    }
+  }catch(err){toast(err.message,true)}
+});
+
+// ── Kullanıcılar ──
+async function loadUsers(){try{USERS=(await call('GET',null,'?users=1')).users;renderUsers()}catch(e){toast(e.message,true)}}
+function renderUsers(){
+  const q=$('search').value.trim().toLowerCase();
+  const list=USERS.filter(u=>!q||u.name.toLowerCase().includes(q)||u.email.toLowerCase().includes(q));
+  $('bUsr').textContent=USERS.length;$('sUsers').textContent=USERS.length;$('sBal').textContent=tl(USERS.reduce((a,u)=>a+u.balance,0));
+  $('usr').innerHTML='<tr><th>#</th><th>Ad Soyad</th><th>E-posta</th><th>Bakiye</th><th>Kayıt</th><th></th></tr>'+
+    (list.map(u=>`<tr><td>${u.id}</td><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td class="gold">${tl(u.balance)}</td><td>${dt(u.created_at)}</td><td><button data-a="bal" data-m="add" data-id="${u.id}">Bakiye Ekle</button><button class="r" data-a="bal" data-m="sub" data-id="${u.id}">Bakiye Eksilt</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty">Kullanıcı bulunamadı.</td></tr>');
+}
+$('search').oninput=renderUsers;
+
+// ── Havale bilgileri ──
+async function loadBank(){try{const b=await call('GET',null,'?bank=1');$('bName').value=b.name;$('bIban').value=b.iban;$('bDesc').value=b.desc}catch(e){toast(e.message,true)}}
+async function saveBank(){
+  if(!confirm('Havale bilgileri güncellensin mi? Kullanıcılar yeni bilgileri görecek.'))return;
+  try{const r=await call('POST',{type:'bank',action:'save',name:$('bName').value,iban:$('bIban').value,desc:$('bDesc').value});
+    $('bName').value=r.name;$('bIban').value=r.iban;$('bDesc').value=r.desc;toast('✅ Havale bilgileri güncellendi.')}catch(e){toast(e.message,true)}
+}
+function closeBal(){$('balModal').classList.remove('open')}
+async function saveBal(){
+  const n=Math.abs(Number($('mAmount').value));if(!n)return toast('Tutar girin.',true);
+  if(balMode<0&&Math.round(n*100)>balUser.balance)return toast('Kullanıcının bakiyesi yetersiz (Mevcut: '+tl(balUser.balance)+').',true);
+  const v=balMode*n;
+  if(!confirm(balUser.name+' için '+(v>0?'+':'−')+n.toLocaleString('tr-TR')+' ₺ '+(v>0?'eklensin':'düşülsün')+' mi?'))return;
+  try{const r=await call('POST',{type:'user',action:'balance',id:balUser.id,amount:v});closeBal();toast('✅ Yeni bakiye: '+tl(r.balance));loadUsers()}
+  catch(e){toast(e.message,true)}
+}
+$('balModal').onclick=e=>{if(e.target.id==='balModal')closeBal()};
+$('key').addEventListener('keydown',e=>{if(e.key==='Enter')start()});
+if($('key').value)start();
+</script></body></html>
